@@ -10,18 +10,29 @@ import javax.inject.Inject
 class WeatherRepository @Inject constructor(private val api: WeatherApi) {
 
     suspend fun getCoordinates(cityName: String, apiKey: String): GeoLocationResponse? {
-        Log.d("rakesh","WeatherRepository:: $cityName ... $apiKey")
-        return api.getCoordinates(cityName, 1, apiKey).firstOrNull()
+        val response = api.getCoordinates(cityName, 1, apiKey)
+        return if (response.isSuccessful) {
+            val geoLocations = response.body()
+            geoLocations?.firstOrNull() // Return the first result, or null if empty
+        } else {
+            Log.e("WeatherRepository", "Failed to fetch coordinates: ${response.errorBody()}")
+            null
+        }
     }
 
     suspend fun getWeatherDetails(
         latitude: Double,
         longitude: Double,
         apiKey: String
-    ): WeatherResponse {
-        Log.d("rakesh","WeatherRepository:: getWeatherDetails")
-        return api.getWeatherDetails(latitude, longitude, apiKey)
+    ): WeatherResponse? {
+        val response = api.getWeatherDetails(latitude, longitude, apiKey)
+        return if (response.isSuccessful) {
+            response.body() // Return the weather response
+        } else {
+            Log.e("WeatherRepository", "Failed to fetch weather details: ${response.errorBody()}")
+            null
+        }
     }
-
 }
+
 
