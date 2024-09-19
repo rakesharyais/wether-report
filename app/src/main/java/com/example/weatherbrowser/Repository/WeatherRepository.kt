@@ -9,6 +9,7 @@ import javax.inject.Inject
 
 class WeatherRepository @Inject constructor(private val api: WeatherApi) {
 
+    //Fetches the latitude and longitude for a given city name.
     suspend fun getCoordinates(cityName: String, apiKey: String): GeoLocationResponse? {
         val response = api.getCoordinates(cityName, 1, apiKey)
         return if (response.isSuccessful) {
@@ -20,6 +21,7 @@ class WeatherRepository @Inject constructor(private val api: WeatherApi) {
         }
     }
 
+    //to fetches the weather details of a city
     suspend fun getWeatherDetails(
         latitude: Double,
         longitude: Double,

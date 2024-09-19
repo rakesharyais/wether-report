@@ -13,32 +13,37 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(private val repository: WeatherRepository) : ViewModel() {
+
+    // Holds the weather data of the searched city
     private val _weatherData = MutableStateFlow<WeatherResponse?>(null)
     val weatherData: StateFlow<WeatherResponse?> = _weatherData
 
+    // Holds the weather data for the current location
     private val _currentCityWeatherData = MutableStateFlow<WeatherResponse?>(null)
     val currentCityWeatherData: StateFlow<WeatherResponse?> = _currentCityWeatherData
 
+    //Fetches the weather details for a given city
     fun fetchWeather(cityName: String, apiKey: String) {
-        Log.d("rakesh","WeatherViewModel:: $cityName ... $apiKey")
         viewModelScope.launch {
             try {
                 val geoData = repository.getCoordinates(cityName, apiKey)
                 geoData?.let {
                     val weather = repository.getWeatherDetails(it.lat, it.lon, apiKey)
+                    // Update the weather data which will be observed by the ui
                     _weatherData.value = weather
                 }
             } catch (e: Exception) {
-                // handle exception
+                Log.d("WeatherViewModel","Exception = ${e.message}")
             }
         }
     }
 
 
+    //Fetches the weather details for the current location
     fun getCurrentLocationWeatherDetails(latitude: Double, longitude: Double,apikey: String) {
-        Log.d("rakesh","getCurrentLocationWeatherDetails")
         viewModelScope.launch {
             val weather = repository.getWeatherDetails(latitude, longitude, apikey)
+            // Update the current city weather data which will be observed in the UI
             _currentCityWeatherData.value = weather
         }
     }

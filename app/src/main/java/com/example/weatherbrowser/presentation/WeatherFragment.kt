@@ -34,9 +34,11 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
 
     private val viewModel: WeatherViewModel by viewModels()
 
+    //for retrieving device location
     @Inject
     lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    //to store and retrieve last searched city
     @Inject
     lateinit var appPreferences: SharedPreferences
 
@@ -45,6 +47,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
 
         _binding = FragmentWeatherBinding.bind(view)
 
+        //// Retrieve the last searched city from SharedPreferences
         val lastSearchedCity = appPreferences.getString("last_searched_city", null)
         if (lastSearchedCity != null) {
             viewModel.fetchWeather(lastSearchedCity, BuildConfig.API_KEY)
@@ -60,10 +63,12 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
 
             if (cityName.isNotEmpty()) {
                 appPreferences.edit().putString("last_searched_city", cityName).apply()
+                // Fetch weather data
                 viewModel.fetchWeather(cityName, BuildConfig.API_KEY)
             }
         }
 
+        // Collect and observe weather data for a city and apply it to the UI
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.weatherData.collect { weather ->
@@ -98,11 +103,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
                             .load(iconUrl)
                             .into(binding.imageViewWeatherIcon)
                     } else {
-                        Toast.makeText(
-                            requireContext(),
-                            "No weather data available",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Log.d("WeatherFragment","No weather data available")
                     }
                 }
             }
@@ -138,22 +139,17 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
                         binding.textViewCurrentCondition.text =
                             "Condition: ${weather.weather[0].description}"
 
+                        // Load weather icon
                         val iconCode = weather.weather[0].icon
                         val iconUrl = "https://openweathermap.org/img/wn/$iconCode@2x.png"
                         Glide.with(this@WeatherFragment)
                             .load(iconUrl)
                             .into(binding.imageViewCurrentWeatherIcon)
-                    } else {
-                        Toast.makeText(
-                            requireContext(),
-                            "No current city weather data available",
-                            Toast.LENGTH_SHORT
-                        ).show()
                     }
                 }
             }
         }
-
+        // Request location permission to get weather data
         requestLocationPermission()
     }
 
@@ -167,8 +163,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
                     val longitude = location.longitude
                     getWeatherForLocation(latitude, longitude)
                 } else {
-                    Toast.makeText(requireContext(), "Unable to get location", Toast.LENGTH_SHORT)
-                        .show()
+                    Log.d("WeatherFragment","Unable to get location")
                 }
             }
     }
@@ -178,6 +173,7 @@ class WeatherFragment : Fragment(R.layout.fragment_weather) {
         viewModel.getCurrentLocationWeatherDetails(latitude, longitude, BuildConfig.API_KEY)
     }
 
+    // checking the location access permission
     private fun requestLocationPermission() {
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
