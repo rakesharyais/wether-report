@@ -3,7 +3,9 @@ package com.example.weatherbrowser.presentation
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.weatherbrowser.R
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
